@@ -1,0 +1,1453 @@
+
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>METAL BOOK - Almoxarifado Futurista</title>
+  <style>
+    :root {
+      --primary: #ffffff;
+      --secondary: #002a5a;
+      --accent: #007bff;
+      --text: #111;
+      --gray-light: #f5f5f5;
+      --gray-dark: #e0e0e0;
+      --modal-bg: rgba(0, 0, 0, 0.6);
+      --dark-bg: #121212;
+      --dark-text: #ffffff;
+    }
+    [data-theme="dark"] {
+      --primary: var(--dark-bg);
+      --text: var(--dark-text);
+      --gray-light: #222;
+      --gray-dark: #333;
+      --modal-bg: rgba(0, 0, 0, 0.8);
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--primary);
+      color: var(--text);
+      transition: background-color 0.3s, color 0.3s;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background-color: var(--secondary);
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 700;
+      font-size: 1.5rem;
+      letter-spacing: 0.1rem;
+      user-select: none;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    #evaluation-icon {
+      cursor: pointer;
+      font-size: 1.2rem;
+      position: relative;
+      margin-right: 1rem;
+    }
+    #evaluation-count {
+      background-color: #e63946;
+      color: white;
+      font-size: 0.8rem;
+      font-weight: 700;
+      border-radius: 50%;
+      padding: 0.1rem 0.5rem;
+      position: absolute;
+      top: -8px;
+      right: -10px;
+      user-select: none;
+    }
+    .theme-toggle {
+      background: white;
+      color: var(--secondary);
+      padding: 0.4rem 0.8rem;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      border: none;
+      transition: background-color 0.3s, color 0.3s;
+      user-select: none;
+    }
+    .theme-toggle:hover {
+      background-color: var(--accent);
+      color: white;
+    }
+    nav {
+      display: flex;
+      border-bottom: 2px solid var(--gray-dark);
+      background-color: var(--gray-light);
+    }
+    [data-theme="dark"] nav {
+      background-color: var(--gray-dark);
+      border-color: var(--gray-light);
+    }
+    nav button[role="tab"] {
+      flex-grow: 1;
+      padding: 1rem;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--secondary);
+      transition: background-color 0.3s, color 0.3s;
+      user-select: none;
+    }
+    nav button[aria-selected="true"] {
+      background-color: var(--secondary);
+      color: white;
+      border-radius: 0 0 10px 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    }
+    nav button:hover:not([aria-selected="true"]) {
+      background-color: var(--gray-dark);
+    }
+    main {
+      flex-grow: 1;
+      padding: 0rem;
+      background-color: var(--gray-light);
+      min-height: 70vh;
+      transition: background-color 0.3s;
+    }
+    [data-theme="dark"] main {
+      background-color: var(--gray-dark);
+    }
+    .content > div[role="tabpanel"] {
+      display: none;
+    }
+    .content > div[role="tabpanel"].active {
+      display: block;
+    }
+    @keyframes fadeIn {
+      from {opacity: 0;}
+      to {opacity: 1;}
+    }
+
+    /* Products Grid */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 1.2rem;
+    }
+    .product-card {
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgb(0 42 90 / 0.15);
+      padding: 1rem;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: transform 0.2s, box-shadow 0.3s;
+      user-select: none;
+      border: 2px solid transparent;
+    }
+    .product-card:hover {
+      box-shadow: 0 8px 20px rgb(0 42 90 / 0.3);
+      transform: translateY(-4px);
+      border-color: var(--accent);
+    }
+    [data-theme="dark"] .product-card {
+      background-color: #1f2937;
+      color: var(--dark-text);
+      box-shadow: 0 2px 12px rgba(0, 42, 90, 0.5);
+    }
+    [data-theme="dark"] .product-card:hover {
+      box-shadow: 0 8px 20px rgba(0, 42, 90, 0.8);
+      border-color: var(--accent);
+    }
+    .product-card img {
+      max-width: 90px;
+      max-height: 90px;
+      object-fit: contain;
+      margin-bottom: 0.8rem;
+      filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.1));
+    }
+    .product-card h4 {
+      margin: 0;
+      font-size: 1.1rem;
+      text-align: center;
+    }
+    .product-card p {
+      font-size: 0.85rem;
+      color: var(--secondary);
+      text-align: center;
+      margin-top: 0.3rem;
+    }
+
+    /* Modal styles */
+    .modal-bg {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: var(--modal-bg);
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    .modal-bg.active {
+      display: flex;
+    }
+    .modal-content {
+      background: var(--primary);
+      border-radius: 15px;
+      max-width: 400px;
+      width: 90%;
+      padding: 2rem;
+      position: relative;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      text-align: center;
+      color: var(--text);
+      user-select: text;
+    }
+    [data-theme="dark"] .modal-content {
+      background: #222831;
+      color: var(--dark-text);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.7);
+    }
+    .modal-content img {
+      max-width: 120px;
+      margin-bottom: 1rem;
+      filter: drop-shadow(1px 1px 3px rgba(0,0,0,0.15));
+    }
+    .modal-content h3 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.4rem;
+    }
+    .modal-content p {
+      font-size: 1rem;
+      color: var(--text);
+      margin-bottom: 1.5rem;
+    }
+    .modal-close {
+      position: absolute;
+      top: 12px;
+      right: 15px;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text);
+      font-weight: 700;
+      user-select: none;
+    }
+    .modal-close:hover {
+      color: var(--accent);
+    }
+    .modal-content button {
+      background-color: var(--secondary);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 0.7rem 1.2rem;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      user-select: none;
+    }
+    .modal-content button:hover {
+      background-color: var(--accent);
+    }
+/* Cole logo após .modal-content button:hover { ... } */
+
+/* New Review Section Styles */
+#product-reviews h4 {
+  text-align: left;
+  margin-top: 1.5rem;
+  margin-bottom: 0.8rem;
+  color: var(--secondary);
+}
+#reviews-list {
+  max-height: 150px;
+  overflow-y: auto;
+  border: 1px solid var(--gray-dark);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  margin-bottom: 1rem;
+  background-color: var(--gray-light);
+}
+[data-theme="dark"] #reviews-list {
+  background-color: #1f2937;
+  border-color: #333;
+}
+#reviews-list li {
+  padding: 0.5rem 0;
+  border-bottom: 1px dashed var(--gray-dark);
+  text-align: left;
+  color: var(--text);
+}
+#reviews-list li:last-child {
+  border-bottom: none;
+}
+#reviews-list .review-rating {
+  font-weight: bold;
+  color: var(--accent);
+}
+#reviews-list .review-comment {
+  font-size: 0.9em;
+  margin-top: 0.3rem;
+  color: var(--text);
+}
+
+/* Review Form Styles */
+#review-form h4 {
+  text-align: left;
+  margin-top: 1.5rem;
+  margin-bottom: 0.8rem;
+  color: var(--secondary);
+}
+#review-form label {
+  text-align: left;
+}
+#review-form select,
+#review-form textarea {
+  background-color: var(--primary);
+  color: var(--text);
+  transition: border-color 0.3s;
+}
+#review-form select:focus,
+#review-form textarea:focus {
+  outline: none;
+  border-color: var(--secondary);
+}
+
+    /* News and About content */
+    .news-item, #tab-about, #tab-contact {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 3px 15px rgba(0,0,0,0.07);
+      color: var(--text);
+      user-select: text;
+    }
+    [data-theme="dark"] .news-item,
+    [data-theme="dark"] #tab-about,
+    [data-theme="dark"] #tab-contact {
+      background: #222831;
+      color: var(--dark-text);
+      box-shadow: 0 3px 15px rgba(0,42,90,0.6);
+    }
+    h2, h3 {
+      margin-top: 0;
+      color: var(--secondary);
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    ul li {
+      margin-bottom: 0.6rem;
+      font-weight: 600;
+    }
+     form.contact-form textarea,
+form.contact-form input {
+  padding: 0.6rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1px solid var(--gray-dark);
+  resize: vertical;
+  background-color: var(--primary);
+  color: var(--text);
+  transition: border-color 0.3s;
+  margin-top: 1rem;
+  gap: 0.8rem;
+  display: flex;
+  flex-direction: column;
+}
+    form.contact-form input:focus,
+    form.contact-form textarea:focus {
+      outline: none;
+      border-color: var(--secondary);
+    }
+    form.contact-form button {
+      background-color: var(--secondary);
+      color: white;
+      border: none;
+      padding: 0.7rem;
+      font-size: 1.1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    form.contact-form button:hover {
+      background-color: var(--accent);
+    }
+
+    /* Avaliação panel */
+    #evaluation-panel {
+      position: fixed;
+      right: 0;
+      top: 70px;
+      width: 320px;
+      max-height: calc(100vh - 80px);
+      background: var(--primary);
+      box-shadow: -6px 0 20px rgba(0,0,0,0.25);
+      border-left: 3px solid var(--secondary);
+      padding: 1rem 1.5rem;
+      overflow-y: auto;
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+      z-index: 10000;
+      user-select: none;
+    }
+    #evaluation-panel.open {
+      transform: translateX(0);
+    }
+    #evaluation-panel h3 {
+      margin-top: 0;
+      color: var(--secondary);
+      text-align: center;
+      font-weight: 700;
+    }
+    #evaluation-list {
+      margin-top: 1rem;
+      list-style: none;
+      padding: 0;
+      max-height: 50vh;
+      overflow-y: auto;
+      user-select: text;
+    }
+    #evaluation-list li {
+      border-bottom: 1px solid var(--gray-dark);
+      padding: 0.6rem 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    #evaluation-list li:last-child {
+      border-bottom: none;
+    }
+    #evaluation-list .remove-btn {
+      background: none;
+      border: none;
+      color: var(--accent);
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 1.1rem;
+      transition: color 0.3s;
+      user-select: none;
+    }
+    #evaluation-list .remove-btn:hover {
+      color: #e63946;
+    }
+    #toggle-evaluation-btn {
+      background-color: var(--secondary);
+      border: none;
+      color: rgb(5, 28, 78);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      user-select: none;
+      transition: background-color 0.3s;
+      margin-left: 0.5rem;
+    }
+    #toggle-evaluation-btn:hover {
+      background-color: var(--accent);
+    }
+    /* Scrollbar */
+    #evaluation-panel::-webkit-scrollbar,
+    #evaluation-list::-webkit-scrollbar {
+      width: 8px;
+    }
+    #evaluation-panel::-webkit-scrollbar-thumb,
+    #evaluation-list::-webkit-scrollbar-thumb {
+      background-color: var(--secondary);
+      border-radius: 20px;
+    }
+    #tab-chat {
+ /* height: 100%; */
+ /* min-height: 0; */
+/*flex-direction: column; */
+}
+
+#chat-container {
+  flex: 1 1 auto;
+  height: 800px;
+  min-height: 400px;
+  background: #ece5dd;
+  border-radius: 10px;
+  border: 4px solid #ccc;
+  overflow: hidden;
+}
+    /* Altere as cores dos textos para branco no modo escuro */
+/* Substitua ou adicione estas linhas ao seu CSS: */
+
+[data-theme="dark"] {
+  --primary: var(--dark-bg);
+  --text: #fff;           /* branco */
+  --gray-light: #222;
+  --gray-dark: #333;
+  --modal-bg: rgba(0, 0, 0, 0.8);
+}
+
+[data-theme="dark"] .product-card,
+[data-theme="dark"] .modal-content,
+[data-theme="dark"] .news-item,
+[data-theme="dark"] #tab-news,
+[data-theme="dark"] #tab-contact,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3,
+[data-theme="dark"] label,
+[data-theme="dark"] p,
+[data-theme="dark"] ul li,
+[data-theme="dark"] .review-comment,
+[data-theme="dark"] .review-rating {
+  color: #ffffff !important;
+}
+[data-theme="dark"] button,
+[data-theme="dark"] .modal-content button {
+  color: #fff !important;
+}
+[data-theme="dark"] .product-card p {
+  color: #fff !important;
+}
+[data-theme="dark"] #product-reviews h4,
+[data-theme="dark"] #review-form h4 {
+  color: #fff !important;
+}
+[data-theme="dark"] #no-reviews-msg {
+  color: #fff !important;
+}
+[data-theme="dark"] #evaluation-panel h3 {
+  color: #fff !important;
+}
+  [data-theme="dark"] #theme-toggle {
+  background: #f4f5f7;   /* azul escuro */
+  color: #040130 !important;
+}
+.chat-msg {
+  max-width: 70%;
+  padding: 0.6rem 1rem;
+  border-radius: 18px;
+  font-size: 1rem;
+  word-break: break-word;
+  display: inline-block;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+.chat-msg.user {
+  background: #1faaeb;
+  align-self: flex-end;
+  color: #222;
+  border-bottom-right-radius: 4px;
+}
+.chat-msg.manager {
+  background: #fff;
+  align-self: flex-start;
+  color: #222;
+  border-bottom-left-radius: 4px;
+}
+#chat-form {
+  display: flex;
+  gap: 0.5rem;
+}
+#chat-input {
+  flex: 1;
+  padding: 0.6rem;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+#chat-form button {
+  background-color: #021d50;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 0 1.2rem;
+  font-size: 1rem;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+#chat-form button:hover {
+  background-color: #041f68;
+}
+.contact-btn.active {
+  background: #e0f7e9 !important;
+  font-weight: bold;
+  color: #031f47;
+}
+#contacts-list button:hover {
+  background: #e9e9e9;
+}
+#chat-box {
+  background: #ece5dd;
+  border-radius: 0 0 10px 10px;
+  padding: 1rem;
+  height: 100%;
+  overflow-y: auto;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+main, .content {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+body, html {
+  height: 100%;
+  min-height: 100%;
+}
+[data-theme="dark"] #contacts-list button {
+  color: #14113f !important;
+}
+.avatar-img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+[data-theme="dark"] #chat-container {
+  background: #222831;
+  color: #fff;
+}
+[data-theme="dark"] #chat-box {
+  background: #23272f;
+  color: #fff;
+}
+[data-theme="dark"] #contacts-list {
+  background: #1a1d23;
+  border-right: 1px solid #333;
+}
+[data-theme="dark"] .contact-btn {
+  background: #23272f;
+  color: #fff;
+}
+[data-theme="dark"] .contact-btn.active {
+  background: #393e46;
+  color: #fff;
+}
+[data-theme="dark"] #chat-form {
+  background: #23272f;
+}
+[data-theme="dark"] .chat-msg.user {
+  background: #1faaeb;
+  color: #fff;
+}
+[data-theme="dark"] .chat-msg.manager {
+  background: #393e46;
+  color: #fff;
+}
+/* ...seus estilos anteriores... */
+
+/* Cole aqui o CSS do modo escuro para o chat */
+[data-theme="dark"] #chat-container,
+[data-theme="dark"] #chat-box,
+[data-theme="dark"] #chat-form,
+[data-theme="dark"] #chat-input,
+[data-theme="dark"] #chat-form button,
+[data-theme="dark"] .chat-msg.user,
+[data-theme="dark"] .chat-msg.manager,
+[data-theme="dark"] .contact-btn,
+[data-theme="dark"] .contact-btn.active {
+  background: #23272f !important;
+  color: #fff !important;
+  border-color: #393e46 !important;
+}
+/* ...existing code... */
+
+/* Barra de contatos escura */
+[data-theme="dark"] #contacts-list {
+  background: #1a2233 !important;
+  color: #fff !important;
+}
+
+/* Mensagens (balões) azul escuro */
+[data-theme="dark"] .chat-msg.user,
+[data-theme="dark"] .chat-msg.manager {
+  background: #0d2346 !important;
+  color: #fff !important;
+}
+
+/* Botão de enviar azul escuro */
+[data-theme="dark"] #chat-form button {
+  background: #0d2346 !important;
+  color: #fff !important;
+  border: none !important;
+}
+#streetview-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+/* ...existing code... */
+.modal-info-text {
+  color: var(--secondary);
+}
+[data-theme="dark"] .modal-info-text {
+  color: #f8f8f4 !important; /* amarelo ouro, ou escolha outra cor */
+}
+/* ...existing code... */
+.modal-visualizacao-text {
+  color: var(--secondary);
+}
+[data-theme="dark"] .modal-visualizacao-text {
+  color: #ffffff !important; /* amarelo ouro, ou escolha outra cor */
+}
+
+.review-date {
+  color: var(--secondary);
+}
+[data-theme="dark"] .review-date {
+  color: #f8f8f6 !important; /* amarelo ouro, ou escolha outra cor */
+}
+[data-theme="dark"] #forward-modal {
+  color: #181616 !important;
+}
+[data-theme="dark"] #forward-modal button {
+  color: #181515 !important;
+  background: #153a85 !important;
+  border-color: #194ea3 !important;
+}
+/* ...existing code... */
+/* ...existing code... */
+
+/* ...existing code... */
+
+/* ...restante do CSS sugerido... */
+</style>
+</head>
+<body>
+<div id="login-modal" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:99999;">
+  <form id="login-form" style="background:#fff;padding:2rem;border-radius:10px;box-shadow:0 2px 12px #0002;display:flex;flex-direction:column;gap:1rem;min-width:280px;">
+    <h2 style="margin:0 0 1rem 0;">Login</h2>
+    <input id="login-user" type="text" placeholder="Usuário" required style="padding:0.6rem;border-radius:6px;border:1px solid #ccc;">
+    <input id="login-pass" type="password" placeholder="Senha" required style="padding:0.6rem;border-radius:6px;border:1px solid #ccc;">
+    <button type="submit" style="background:#002a5a;color:#fff;padding:0.7rem;border:none;border-radius:6px;font-weight:bold;">Entrar</button>
+    <span id="login-error" style="color:red;display:none;">Usuário ou senha inválidos!</span>
+  </form>
+</div>
+<header>
+  <div>METAL BOOK</div>
+  <div id="user-profile" style="display: flex; align-items: center; margin-right: 1rem;">
+<img id="user-avatar" src="https://0.gravatar.com/avatar/2a05077998c8a40c664beae00fa253f7c242e7045f9de5f88a41f6cbebaf7261?size=256&d=initials" alt="Avatar do usuário" style="width:40px; height:40px; border-radius:50%; margin-right:0.5rem;">
+</div>
+  <div style="display:flex; align-items:center;">
+    <div id="evaluation-icon" title="Mostrar Avaliação">
+      📝 Avaliação <span id="evaluation-count">0</span>
+    </div>
+    <button id="theme-toggle" class="theme-toggle" aria-label="Alternar modo escuro e claro">Modo Escuro/Claro</button>
+  </div>
+</header>
+<nav role="tablist">
+  <button role="tab" aria-selected="true" aria-controls="tab-products" id="tab-products-btn">Produtos</button>
+  <button role="tab" aria-selected="false" aria-controls="tab-news" id="tab-news-btn">Novidades & Sobre</button>
+  <button role="tab" aria-selected="false" aria-controls="tab-chat" id="tab-chat-btn">Comunicação (Chat em tempo real)</button>
+</nav>
+<main>
+  <section class="content">
+    <!-- Produtos -->
+    <div id="tab-products" role="tabpanel" tabindex="0" class="active">
+    <!-- Campo de busca e filtro -->
+<div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+  <input
+    id="search-input"
+    type="text"
+    placeholder="Buscar produto..."
+    style="flex:1; min-width:180px; padding:0.6rem; border-radius:6px; border:1px solid var(--gray-dark);"
+    aria-label="Buscar produto"
+  />
+  <select
+    id="filter-select"
+    style="min-width:160px; padding:0.6rem; border-radius:6px; border:1px solid var(--gray-dark);"
+    aria-label="Filtrar por categoria"
+  >
+    <option value="">Todos</option>
+    <option value="Ferramenta">Ferramentas</option>
+    <option value="EPI">EPI</option>
+    <option value="Material">Materiais</option>
+  </select>
+</div>
+<form id="add-product-form" style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; align-items: flex-end;">
+  <input id="new-prod-nome" type="text" placeholder="Nome do produto" required style="flex:1; min-width:140px; padding:0.6rem; border-radius:6px; border:1px solid var(--gray-dark);" />
+  <input id="new-prod-desc" type="text" placeholder="Descrição" required style="flex:2; min-width:180px; padding:0.6rem; border-radius:6px; border:1px solid var(--gray-dark);" />
+  <select id="new-prod-categoria" required style="min-width:120px; padding:0.6rem; border-radius:6px; border:1px solid var(--gray-dark);">
+    <option value="">Categoria</option>
+    <option value="Ferramenta">Ferramenta</option>
+    <option value="EPI">EPI</option>
+    <option value="Material">Material</option>
+  </select>
+  <input id="new-prod-img" type="url" placeholder="URL da imagem" style="flex:2; min-width:180px; padding:0.6rem; border-radius:6px; border:1px solid var(--gray-dark);" />
+  <button type="submit" style="background-color: var(--secondary); color: white; border: none; border-radius: 6px; padding: 0.7rem 1.2rem; font-size: 1rem; cursor: pointer;">Cadastrar Produto</button>
+</form>
+<p id="add-prod-feedback" style="display:none; color:green; font-weight:bold; margin-bottom:1rem;">Produto cadastrado com sucesso!</p>
+      <div id="product-grid" class="product-grid"></div>
+    </div>
+    <!-- Substitua as duas divs de novidades e sobre por uma só, assim: -->
+<div id="tab-news" role="tabpanel" tabindex="0">
+  <h2>Novidades & Sobre</h2>
+  <article class="news-item">
+    <h3>Lançamento do sistema automatizado</h3>
+    <p>Nova tecnologia que otimiza o controle de estoque de Forma Simples que melhora a precisão operacional em até 50%.</p>
+  </article>
+  <article class="news-item">
+    <h3>Atualizações Futuras</h3>
+    <p>Em breve: sistema de monitoramento em tempo real, relatórios inteligentes e integração com sistemas ERP.</p>
+  </article>
+  <h2>Sobre o Almoxarifado Futurista</h2>
+  <p>O Metal Book é um sistema de gerenciamento e comunicação empresarial que busca a automação e uma comunicação mais clara e coesa entre colaboradores </p>
+  <ul>
+    <li>Controle de estoque em tempo real</li>
+    <li>Gestão de avaliações e feedbacks</li>
+    <li>Interface moderna e responsiva</li>
+    <li>Comunicaçõa em tempo real via chat</li>
+  </ul>
+</div>
+<div id="tab-chat" role="tabpanel" tabindex="0" aria-hidden="true">
+  <h2>Comunicação - Chat em tempo real</h2>
+  <div id="chat-container" style="display: flex; background: #ece5dd; border-radius: 10px; border: 4px solid #ccc; overflow: hidden;">
+    <aside id="contacts-list" style="width: 180px; background: #f7f7f7; border-right: 1px solid #ddd; display: flex; flex-direction: column;">
+      <div style="padding: 0.8rem; font-weight: bold; border-bottom: 1px solid #eee; background: #040a5c; color: #fff;">Contatos</div>
+      <button class="contact-btn active" data-contact="Colaborador">
+      <img src="https://media-gru2-1.cdn.whatsapp.net/v/t61.24694-24/473405167_922724466468235_6619458111856688806_n.jpg?ccb=11-4&oh=01_Q5Aa1wHU5cbQVK94wvsOy21_w65KYqLkf_N6GV-g5TVoyYFNSw&oe=68593128&_nc_sid=5e03e0&_nc_cat=108" alt="Colaborador" class="avatar-img" style="width:28px; height:28px; border-radius:50%; margin-right:8px;"> Colaborador
+      </button>
+      <button class="contact-btn" data-contact="suporte">
+  <img src="https://media-gig4-2.cdn.whatsapp.net/v/t61.24694-24/491873889_1915626822515939_2870570369426974683_n.jpg?ccb=11-4&oh=01_Q5Aa1wHnPbOT-NIHNV-dQ2QJLbzVFKNadJlR8ANC-UDGIpORXw&oe=685D17B5&_nc_sid=5e03e0&_nc_cat=105" alt="Suporte" class="avatar-img" style="width:28px; height:28px; border-radius:50%; margin-right:8px;"> Suporte
+</button>
+      <button class="contact-btn" data-contact="financeiro">
+  <img src="https://media-gig4-2.cdn.whatsapp.net/v/t61.24694-24/491868808_592719736756738_5017874301514415552_n.jpg?ccb=11-4&oh=01_Q5Aa1wFDa7d_t9IQN-ncN38zzgPsv9aWPxocV_6UaDyjeL8RdQ&oe=685D2C90&_nc_sid=5e03e0&_nc_cat=108" alt="Colaborador" class="avatar-img" style="width:28px; height:28px; border-radius:50%; margin-right:8px;"> Financeiro
+</button>
+    </aside>
+    <section style="flex: 1; display: flex; flex-direction: column;">
+      <div id="chat-header" style="padding: 0.8rem 1rem; background: #040a5c; color: #fff; font-weight: bold; border-bottom: 1px solid #ddd;">Gerente</div>
+      <div id="chat-box" style="flex: 1;"></div>
+      <form id="chat-form" style="display: flex; gap: 0.5rem; padding: 0.7rem; background: #f7f7f7;">
+        <input id="chat-input" type="text" placeholder="Digite sua mensagem..." required style="flex:1; padding:0.6rem; border-radius:20px; border:1px solid #ccc;" />
+        <button type="submit" style="background-color: #040a5c; color: white; border: none; border-radius: 20px; padding: 0 1.2rem; font-size: 1rem; cursor: pointer; font-weight: bold;">Enviar</button>
+      </form>
+    </section>
+</div>
+  </section>
+</main>
+<!-- Modal Produto -->
+<!-- Modal Produto -->
+<div class="modal-bg" id="product-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1">
+  <div class="modal-content">
+    <button class="modal-close" id="modal-close-btn" aria-label="Fechar modal">&times;</button>
+    <img src="" alt="" id="modal-img" />
+    <h3 id="modal-title">Produto</h3>
+    <p id="modal-desc"></p>
+
+    <!-- AGORA DENTRO DO MODAL -->
+    <div id="product-reviews">
+      <h4>Avaliações:</h4>
+      <ul id="reviews-list">
+        <li id="no-reviews-msg" style="text-align: center; color: var(--secondary); font-size: 0.9em; display: none;">Nenhuma avaliação ainda.</li>
+      </ul>
+      <button id="show-review-form-btn" style="margin-top: 1rem; background-color: var(--accent);">Deixar uma Avaliação</button>
+    </div>
+
+   <!-- ...existing code... -->
+<form id="review-form" style="display: none; margin-top: 1.5rem;">
+  <h4>Deixe sua Avaliação:</h4>
+  <div style="margin-bottom: 0.8rem;">
+    <label for="review-rating" style="display: block; margin-bottom: 0.4rem; font-weight: bold;">Sua Nota:</label>
+    <select id="review-rating" required style="width: 100%; padding: 0.5rem; border-radius: 6px; border: 1px solid var(--gray-dark); background-color: var(--primary); color: var(--text);">
+      <option value="">Selecione...</option>
+      <option value="1">Péssimo❌</option>
+      <option value="2">Ruim❌</option>
+      <option value="3">Normal🟨</option>
+      <option value="4">Bom✅</option>
+      <option value="5">Excelente✅</option>
+    </select>
+  </div>
+  <div style="margin-bottom: 1rem;">
+    <label for="review-comment" style="display: block; margin-bottom: 0.4rem; font-weight: bold;">Comentário (opcional):</label>
+    <textarea id="review-comment" rows="3" placeholder="Seu comentário..." style="width: 100%; padding: 0.6rem; border-radius: 6px; border: 1px solid var(--gray-dark); resize: vertical; background-color: var(--primary); color: var(--text);"></textarea>
+  </div>
+  <div style="margin-bottom: 1rem;">
+    <label for="review-date" style="display: block; margin-bottom: 0.4rem; font-weight: bold;">Data da avaliação:</label>
+    <input type="date" id="review-date" style="width: 100%; padding: 0.5rem; border-radius: 6px; border: 1px solid var(--gray-dark); background-color: var(--primary); color: var(--text);" />
+  </div>
+  <button type="submit" style="background-color: var(--secondary);">Enviar Avaliação</button>
+  <button type="button" id="cancel-review-btn" style="background-color: #ccc; color: var(--text); margin-left: 0.5rem;">Cancelar</button>
+  <p id="review-feedback" style="color: green; display: none; margin-top: 0.5rem; font-weight: bold;">Avaliação enviada com sucesso!</p>
+</form>
+<!-- ...existing code... -->
+
+    <button id="add-to-evaluation-btn" style="margin-top: 1.5rem;">Adicionar à Avaliação</button>
+  </div>
+</div>
+<!-- Painel Avaliação -->
+<aside id="evaluation-panel" aria-live="polite" aria-label="Avaliação dos Produtos">
+  <h3>Avaliação</h3>
+  <ul id="evaluation-list">
+    <!-- Produtos adicionados aparecerão aqui -->
+  </ul>
+  <p id="empty-eval-msg" style="text-align:center; color:var(--text); user-select:none;">Nenhum produto avaliado ainda.</p>
+</aside>
+
+<script>
+const loginModal = document.getElementById("login-modal");
+const loginForm = document.getElementById("login-form");
+const loginUser = document.getElementById("login-user");
+const loginPass = document.getElementById("login-pass");
+const loginError = document.getElementById("login-error");
+
+// Usuário e senha fixos para exemplo
+const USER = "admin";
+const PASS = "1234";
+
+loginForm.addEventListener("submit", function(e) {
+  e.preventDefault();
+  if (loginUser.value === USER && loginPass.value === PASS) {
+    loginModal.style.display = "none";
+    // Aqui você pode salvar o login no localStorage se quiser manter logado
+  } else {
+    loginError.style.display = "block";
+  }
+});
+  // Produtos dummy para exemplo (21 produtos)
+  const produtos = [
+  { id: 1, nome: "Parafuso M3", categoria: "Material", descricao: "Parafuso de aço inoxidável, 3mm de diâmetro.", img: "https://tangerin.vteximg.com.br/arquivos/ids/162575/Caixa-de-Papelao-N16---21-x-19-x-18-semfundo.png?v=638161250715700000" },
+  { id: 2, nome: "Porca M3", categoria: "Material", descricao: "Porca em aço para parafusos M3.", img: "https://tangerin.vteximg.com.br/arquivos/ids/162575/Caixa-de-Papelao-N16---21-x-19-x-18-semfundo.png?v=638161250715700000" },
+  { id: 3, nome: "Arruela", categoria: "Material", descricao: "Arruela para distribuir a carga de parafusos.", img: "https://tangerin.vteximg.com.br/arquivos/ids/162575/Caixa-de-Papelao-N16---21-x-19-x-18-semfundo.png?v=638161250715700000" },
+  { id: 4, nome: "Chave de Fenda", categoria: "Ferramenta", descricao: "Ferramenta para apertar ou soltar parafusos.", img: "https://tangerin.vteximg.com.br/arquivos/ids/162575/Caixa-de-Papelao-N16---21-x-19-x-18-semfundo.png?v=638161250715700000" },
+  { id: 5, nome: "Martelo", categoria: "Ferramenta", descricao: "Ferramenta para martelar pregos.", img: "https://tangerin.vteximg.com.br/arquivos/ids/162575/Caixa-de-Papelao-N16---21-x-19-x-18-semfundo.png?v=638161250715700000" },
+  { id: 6, nome: "Broca 5mm", categoria: "Ferramenta", descricao: "Broca para perfuração de 5 milímetros.", img: "https://tangerin.vteximg.com.br/arquivos/ids/162575/Caixa-de-Papelao-N16---21-x-19-x-18-semfundo.png?v=638161250715700000" },
+  { id: 7, nome: "Luva de Proteção", categoria: "EPI", descricao: "Luva para proteção das mãos durante trabalho.", img: "https://tangerin.vteximg.com.br/arquivos/ids/162575/Caixa-de-Papelao-N16---21-x-19-x-18-semfundo.png?v=638161250715700000" },
+  { id: 8, nome: "Fita Isolante", categoria: "Material", descricao: "Fita para isolamento elétrico.", img: "https://tangerin.vteximg.com.br/arquivos/ids/162575/Caixa-de-Papelao-N16---21-x-19-x-18-semfundo.png?v=638161250715700000" },
+  { id: 9, nome: "Parafuso M4", categoria: "Material", descricao: "Parafuso de aço inoxidável, 4mm de diâmetro.", img: "https://tangerin.vteximg.com.br/arquivos/ids/162575/Caixa-de-Papelao-N16---21-x-19-x-18-semfundo.png?v=638161250715700000" },
+  { id: 10, nome: "Chave Allen", categoria: "Ferramenta", descricao: "Chave hexagonal para parafusos Allen.", img: "https://tangerin.vteximg.com.br/arquivos/ids/162575/Caixa-de-Papelao-N16---21-x-19-x-18-semfundo.png?v=638161250715700000" },
+  { id: 11, nome: "Serra Manual", categoria: "Ferramenta", descricao: "Serra para corte manual de madeira.", img: "https://tangerin.vteximg.com.br/arquivos/ids/162575/Caixa-de-Papelao-N16---21-x-19-x-18-semfundo.png?v=638161250715700000" },
+  { id: 12, nome: "Pregos 50mm", categoria: "Material", descricao: "Pacote com 100 pregos de 50mm.", img: "https://tangerin.vteximg.com.br/arquivos/ids/162575/Caixa-de-Papelao-N16---21-x-19-x-18-semfundo.png?v=638161250715700000" },
+  { id: 13, nome: "Chave Inglesa", categoria: "Ferramenta", descricao: "Chave ajustável para porcas e parafusos.", img: "https://tangerin.vteximg.com.br/arquivos/ids/162575/Caixa-de-Papelao-N16---21-x-19-x-18-semfundo.png?v=638161250715700000" },
+  { id: 14, nome: "Furadeira", categoria: "Ferramenta", descricao: "Furadeira elétrica portátil.", img: "https://tangerin.vteximg.com.br/arquivos/ids/162575/Caixa-de-Papelao-N16---21-x-19-x-18-semfundo.png?v=638161250715700000" },
+  { id: 15, nome: "Parafuso M5", categoria: "Material", descricao: "Parafuso de aço inoxidável, 5mm de diâmetro.", img: "https://tangerin.vteximg.com.br/arquivos/ids/162575/Caixa-de-Papelao-N16---21-x-19-x-18-semfundo.png?v=638161250715700000" },
+  { id: 16, nome: "Esmerilhadeira", categoria: "Ferramenta", descricao: "Ferramenta para desbaste e corte.", img: "https://tangerin.vteximg.com.br/arquivos/ids/162575/Caixa-de-Papelao-N16---21-x-19-x-18-semfundo.png?v=638161250715700000" },
+  { id: 17, nome: "Óculos de Proteção", categoria: "EPI", descricao: "Óculos para proteção ocular.", img: "https://tangerin.vteximg.com.br/arquivos/ids/162575/Caixa-de-Papelao-N16---21-x-19-x-18-semfundo.png?v=638161250715700000" },
+  { id: 18, nome: "Chave Phillips", categoria: "Ferramenta", descricao: "Chave de fenda cruzada.", img: "https://tangerin.vteximg.com.br/arquivos/ids/162575/Caixa-de-Papelao-N16---21-x-19-x-18-semfundo.png?v=638161250715700000" },
+  { id: 19, nome: "Lixa de Madeira", categoria: "Material", descricao: "Lixa para acabamento em madeira.", img: "https://tangerin.vteximg.com.br/arquivos/ids/162575/Caixa-de-Papelao-N16---21-x-19-x-18-semfundo.png?v=638161250715700000" },
+  { id: 20, nome: "Cinta de Amarração", categoria: "Material", descricao: "Cinta para amarração e fixação.", img: "https://tangerin.vteximg.com.br/arquivos/ids/162575/Caixa-de-Papelao-N16---21-x-19-x-18-semfundo.png?v=638161250715700000" },
+  { id: 21, nome: "Componentes de Máquinas", categoria: "Material", descricao:"Componentes de Máquinas Diversificadas.", img: "https://tangerin.vteximg.com.br/arquivos/ids/162575/Caixa-de-Papelao-N16---21-x-19-x-18-semfundo.png?v=638161250715700000" },
+  { id: 22, nome: "Caixas", categoria: "Material", descricao:"Caixas Diversas", img: "https://tangerin.vteximg.com.br/arquivos/ids/162575/Caixa-de-Papelao-N16---21-x-19-x-18-semfundo.png?v=638161250715700000" },
+  { id: 23, nome: "Fitas Adesivas", categoria: "Material", descricao:"Fitas Diversas", img: "https://tangerin.vteximg.com.br/arquivos/ids/162575/Caixa-de-Papelao-N16---21-x-19-x-18-semfundo.png?v=638161250715700000" },
+  { id: 24, nome: "Escadas", categoria: "Material", descricao:"Escadas de Pequeno, Médio e Grande Porte", img: "https://tangerin.vteximg.com.br/arquivos/ids/162575/Caixa-de-Papelao-N16---21-x-19-x-18-semfundo.png?v=638161250715700000" },
+  { id: 25, nome: "Capacetes", categoria: "EPI", descricao:"Equipamento de Proteção pessoal", img: "https://tangerin.vteximg.com.br/arquivos/ids/162575/Caixa-de-Papelao-N16---21-x-19-x-18-semfundo.png?v=638161250715700000" },
+  { id: 26, nome: "Botas", categoria: "EPI", descricao:"Equipamento de Proteção pessoal", img: "https://tangerin.vteximg.com.br/arquivos/ids/162575/Caixa-de-Papelao-N16---21-x-19-x-18-semfundo.png?v=638161250715700000" },
+  { id: 27, nome: "Óculos", categoria: "EPI", descricao:"Equipamento de Proteção pessoal", img: "https://tangerin.vteximg.com.br/arquivos/ids/162575/Caixa-de-Papelao-N16---21-x-19-x-18-semfundo.png?v=638161250715700000" }
+];
+  const productGrid = document.getElementById("product-grid");
+  const evaluationIcon = document.getElementById("evaluation-icon");
+  const evaluationCount = document.getElementById("evaluation-count");
+  const evaluationPanel = document.getElementById("evaluation-panel");
+  const evaluationList = document.getElementById("evaluation-list");
+  const emptyEvalMsg = document.getElementById("empty-eval-msg");
+
+  // Modal elementos
+  const modal = document.getElementById("product-modal");
+  const modalCloseBtn = document.getElementById("modal-close-btn");
+  const modalImg = document.getElementById("modal-img");
+  const modalTitle = document.getElementById("modal-title");
+  const modalDesc = document.getElementById("modal-desc");
+  const addToEvalBtn = document.getElementById("add-to-evaluation-btn");
+
+  // Tema
+  const themeToggleBtn = document.getElementById("theme-toggle");
+  const rootElem = document.documentElement;
+
+  // Estado da avaliação (produtos adicionados)
+  let evaluationItems = [];
+
+  // Função para renderizar os produtos
+   // ...existing code...
+const searchInput = document.getElementById("search-input");
+const filterSelect = document.getElementById("filter-select");
+// ...após const filterSelect = document.getElementById("filter-select");
+const addProductForm = document.getElementById("add-product-form");
+const newProdNome = document.getElementById("new-prod-nome");
+const newProdDesc = document.getElementById("new-prod-desc");
+const newProdCategoria = document.getElementById("new-prod-categoria");
+const newProdImg = document.getElementById("new-prod-img");
+const addProdFeedback = document.getElementById("add-prod-feedback");
+
+addProductForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const novoId = produtos.length ? Math.max(...produtos.map(p => p.id)) + 1 : 1;
+  const nome = newProdNome.value.trim();
+  const descricao = newProdDesc.value.trim();
+  const categoria = newProdCategoria.value;
+  const img = newProdImg.value.trim() || "https://tangerin.vteximg.com.br/arquivos/ids/162575/Caixa-de-Papelao-N16---21-x-19-x-18-semfundo.png?v=638161250715700000";
+
+  if (!nome || !descricao || !categoria) return;
+
+  produtos.push({ id: novoId, nome, descricao, categoria, img });
+  renderProducts();
+  addProdFeedback.style.display = "block";
+  addProductForm.reset();
+  setTimeout(() => addProdFeedback.style.display = "none", 2000);
+});
+
+function renderProducts() {
+  const searchTerm = (searchInput?.value || "").toLowerCase();
+  const filterValue = filterSelect?.value || "";
+
+  productGrid.innerHTML = "";
+  produtos
+    .filter(p => {
+      const matchSearch = p.nome.toLowerCase().includes(searchTerm) || p.descricao.toLowerCase().includes(searchTerm);
+      const matchFilter = !filterValue || p.categoria === filterValue;
+      return matchSearch && matchFilter;
+    })
+    .forEach(p => {
+      const card = document.createElement("div");
+      card.className = "product-card";
+      card.setAttribute("tabindex", "0");
+      card.setAttribute("role", "button");
+      card.setAttribute("aria-label", `Ver detalhes do produto ${p.nome}`);
+      card.dataset.id = p.id;
+
+      card.innerHTML = `
+        <img src="${p.img}" alt="${p.nome}" loading="lazy" />
+        <h4>${p.nome}</h4>
+        <p>${p.descricao.length > 30 ? p.descricao.slice(0, 27) + "..." : p.descricao}</p>
+      `;
+      card.addEventListener("click", () => openModal(p));
+      card.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          openModal(p);
+        }
+      });
+      productGrid.appendChild(card);
+    });
+}
+
+// Eventos para busca e filtro
+if (searchInput && filterSelect) {
+  searchInput.addEventListener("input", renderProducts);
+  filterSelect.addEventListener("change", renderProducts);
+}
+
+  // Abrir modal com informações do produto
+
+
+// NEW: Store reviews in a simple object (product_id: [reviews])
+// Each review will be { rating: number, comment: string }
+const productReviews = {}; // Exemplo: { 1: [{ rating: 5, comment: "Excelente parafuso!" }], 2: [] }
+
+// NEW: Modal Review elements
+const productReviewsSection = document.getElementById("product-reviews");
+const reviewsList = document.getElementById("reviews-list");
+const noReviewsMsg = document.getElementById("no-reviews-msg");
+const showReviewFormBtn = document.getElementById("show-review-form-btn");
+// ...após const showReviewFormBtn = document.getElementById("show-review-form-btn");
+showReviewFormBtn.addEventListener("click", () => {
+  reviewForm.style.display = "block";
+  showReviewFormBtn.style.display = "none";
+  reviewFeedbackMsg.style.display = "none";
+  reviewRatingSelect.value = "";
+  reviewCommentTextarea.value = "";
+  reviewDateInput.value = "";
+});
+// ...existing code...
+const reviewForm = document.getElementById("review-form");
+const reviewRatingSelect = document.getElementById("review-rating");
+const reviewCommentTextarea = document.getElementById("review-comment");
+const reviewFeedbackMsg = document.getElementById("review-feedback");
+const cancelReviewBtn = document.getElementById("cancel-review-btn");
+
+// MODIFIED: Abrir modal com informações do produto
+// ...existing code...
+
+// MODIFIED: Abrir modal com informações do produto
+function openModal(produto) {
+  modalImg.src = produto.img;
+  modalImg.alt = produto.nome;
+  modalDesc.textContent = produto.descricao;
+  addToEvalBtn.dataset.id = produto.id;
+
+  // Dados fictícios para exemplo (você pode tornar dinâmico depois)
+  const streetviewDate = "15/06/2024";
+  const streetviewLocation = "Estante A, Terceira prateleira Ao lado das Parafusadeiras";
+
+  // Street View ao lado direito do nome do produto, com data e localização
+  modalTitle.innerHTML = `
+    ${produto.nome}
+    <span id="streetview-box" style="display:inline-block; vertical-align:middle; margin-left:16px;">
+      <div style="display:inline-block; width: 120px; height: 80px; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px #0002; border: 2px solid #007bff; vertical-align:middle;">
+        <img src="https://www.picellileiloes.com.br/arquivos/leiloes/lotes/imagens/76750baf615b03.jpg"
+          alt="Panorama do almoxarifado"
+          style="width: 100%; height: 100%; object-fit: cover;">
+      </div>
+     <div class="modal-info-text" style="font-size:0.85em; margin-bottom:0.2rem; text-align:center;">
+  Foto: ${streetviewDate}<br>
+  Local: ${streetviewLocation}
+    </span>
+  `;
+
+  // Remove o streetview-box antigo (caso exista)
+  const oldBox = document.getElementById("streetview-box");
+  if (oldBox && oldBox.parentElement !== modalTitle) oldBox.remove();
+
+  // Carrega as avaliações do produto selecionado
+  loadProductReviews(produto.id);
+
+  // Sempre mostra o botão e esconde o formulário ao abrir o modal
+showReviewFormBtn.style.display = 'block';
+  reviewForm.style.display = 'none';
+
+  modal.classList.add("active");
+}
+
+// ...existing code...
+
+// NEW: Event listener for review form submission
+// ...existing code...
+const reviewDateInput = document.getElementById("review-date");
+
+reviewForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+
+  const productId = parseInt(addToEvalBtn.dataset.id, 10);
+  const rating = parseInt(reviewRatingSelect.value, 10);
+  const comment = reviewCommentTextarea.value.trim();
+  let dataAvaliacao = "";
+
+  if (!rating) {
+    alert("Por favor, selecione uma nota para a avaliação.");
+    return;
+  }
+
+  if (!productReviews[productId]) {
+    productReviews[productId] = [];
+  }
+
+  if (reviewDateInput.value) {
+    const [ano, mes, dia] = reviewDateInput.value.split("-");
+    dataAvaliacao = `${dia}/${mes}/${ano}`;
+  } else {
+    const now = new Date();
+    dataAvaliacao = now.toLocaleDateString('pt-BR') + ' ' + now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  productReviews[productId].push({ rating, comment, dataAvaliacao });
+
+  reviewFeedbackMsg.style.display = "block";
+  setTimeout(() => {
+    reviewFeedbackMsg.style.display = "none";
+    reviewForm.style.display = 'none';
+    showReviewFormBtn.style.display = 'block';
+    loadProductReviews(productId);
+  }, 1500);
+});
+// ...existing code...
+
+// NEW: Function to load and display reviews for a product
+// ...existing code...
+function loadProductReviews(productId) {
+  reviewsList.innerHTML = "";
+
+  if (!productReviews[productId] || productReviews[productId].length === 0) {
+    noReviewsMsg.style.display = "block";
+  } else {
+    noReviewsMsg.style.display = "none";
+    productReviews[productId].forEach(review => {
+      // Escolhe o emoji conforme a nota
+      let emoji = "";
+      switch (review.rating) {
+        case 1: emoji = "❌"; break;
+        case 2: emoji = "❌"; break;
+        case 3: emoji = "🟨"; break;
+        case 4: emoji = "✅"; break;
+        case 5: emoji = "✅"; break;
+        default: emoji = "";
+      }
+      const li = document.createElement("li");
+      li.innerHTML = `
+        <div class="review-rating">${emoji} Nota: ${review.rating}</div>
+        <div class="review-comment">${review.comment || 'Sem comentário.'}</div>
+        <div class="review-date" style="font-size:0.85em; margin-top:0.2em;">
+        Avaliado em: ${review.dataAvaliacao || ''}
+        </div>
+      `;
+      reviewsList.appendChild(li);
+    });
+    reviewsList.scrollTop = reviewsList.scrollHeight;
+  }
+}
+// ...existing code...
+
+// ...existing code...
+// NEW: Function to load and display reviews for a product
+
+  // Fechar modal
+  function closeModal() {
+    modal.classList.remove("active");
+  }
+
+  // Adicionar produto à avaliação
+  function addToEvaluation(id) {
+    if (!evaluationItems.includes(id)) {
+      evaluationItems.push(id);
+      updateEvaluationUI();
+    } else {
+    }
+  }
+
+  // Remover produto da avaliação
+  function removeFromEvaluation(id) {
+    evaluationItems = evaluationItems.filter(itemId => itemId !== id);
+    updateEvaluationUI();
+  }
+
+  // Atualizar UI da avaliação (lista e contador)
+ // ...localize a função updateEvaluationUI e substitua pelo código abaixo...
+
+function updateEvaluationUI() {
+  // Atualiza contador
+  evaluationCount.textContent = evaluationItems.length;
+
+  // Atualiza lista
+  evaluationList.innerHTML = "";
+  if (evaluationItems.length === 0) {
+    emptyEvalMsg.style.display = "block";
+  } else {
+    emptyEvalMsg.style.display = "none";
+    evaluationItems.forEach(id => {
+      const p = produtos.find(prod => prod.id === id);
+      const li = document.createElement("li");
+      li.textContent = p.nome;
+
+      // Botão remover
+      const removeBtn = document.createElement("button");
+      removeBtn.textContent = "×";
+      removeBtn.className = "remove-btn";
+      removeBtn.setAttribute("aria-label", `Remover ${p.nome} da Avaliação`);
+      removeBtn.addEventListener("click", () => removeFromEvaluation(id));
+      li.appendChild(removeBtn);
+
+      // Botão encaminhar
+      const forwardBtn = document.createElement("button");
+      forwardBtn.textContent = "Encaminhar";
+      forwardBtn.className = "remove-btn";
+      forwardBtn.style.marginLeft = "0.5rem";
+      forwardBtn.setAttribute("aria-label", `Encaminhar ${p.nome} para um contato`);
+      forwardBtn.addEventListener("click", () => showForwardDialog(p));
+      li.appendChild(forwardBtn);
+
+      evaluationList.appendChild(li);
+    });
+  }
+}
+
+// Cole as funções abaixo em qualquer lugar após updateEvaluationUI (por exemplo, antes do // Toggle painel avaliação):
+
+function showForwardDialog(produto) {
+  // Remove modal antigo se existir
+  let modal = document.getElementById("forward-modal");
+  if (modal) modal.remove();
+
+  modal = document.createElement("div");
+  modal.id = "forward-modal";
+  modal.style.position = "fixed";
+  modal.style.top = "0";
+  modal.style.left = "0";
+  modal.style.width = "100vw";
+  modal.style.height = "100vh";
+  modal.style.background = "rgba(0,0,0,0.4)";
+  modal.style.display = "flex";
+  modal.style.alignItems = "center";
+  modal.style.justifyContent = "center";
+  modal.style.zIndex = "100000";
+
+  modal.innerHTML = `
+    <div style="background:#fff; padding:2rem; border-radius:10px; min-width:260px; text-align:center; position:relative;">
+      <button id="close-forward-modal" style="position:absolute;top:8px;right:12px;font-size:1.3rem;background:none;border:none;cursor:pointer;">×</button>
+      <h3>Encaminhar para:</h3>
+      <div id="forward-contacts" style="margin:1rem 0;display:flex;flex-direction:column;gap:0.7rem;"></div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  // Preenche os contatos
+  const contactsDiv = modal.querySelector("#forward-contacts");
+  contacts.forEach(c => {
+    const btn = document.createElement("button");
+    btn.textContent = c.name;
+    btn.style.padding = "0.6rem 1.2rem";
+    btn.style.borderRadius = "6px";
+    btn.style.border = "1px solid #ccc";
+    btn.style.background = "#f7f7f7";
+    btn.style.cursor = "pointer";
+    btn.style.fontWeight = "bold";
+    btn.addEventListener("click", () => {
+      forwardProductToContact(produto, c.id);
+      modal.remove();
+    });
+    contactsDiv.appendChild(btn);
+  });
+
+  // Fechar modal
+  modal.querySelector("#close-forward-modal").onclick = () => modal.remove();
+}
+
+function forwardProductToContact(produto, contactId) {
+  if (!chatConversations[contactId]) chatConversations[contactId] = [];
+  chatConversations[contactId].push({
+    from: "user",
+    text: `Encaminhei o produto para você:\n${produto.nome}\n${produto.descricao}`
+  });
+  // Se o contato estiver ativo, atualiza o chat
+  if (currentContact === contactId) renderChat();
+}
+
+// ...restante do código...
+  // Toggle painel avaliação
+  evaluationIcon.addEventListener("click", () => {
+    evaluationPanel.classList.toggle("open");
+  });
+
+  // Fechar modal ao clicar no botão
+  modalCloseBtn.addEventListener("click", closeModal);
+
+  // Fechar modal ao clicar fora do conteúdo
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) closeModal();
+  });
+
+  // Adicionar produto da modal para avaliação
+  addToEvalBtn.addEventListener("click", () => {
+    const id = parseInt(addToEvalBtn.dataset.id, 10);
+    addToEvaluation(id);
+    closeModal();
+  });
+
+  // Alternar tema claro/escuro
+  themeToggleBtn.addEventListener("click", () => {
+    if (rootElem.getAttribute("data-theme") === "dark") {
+      rootElem.removeAttribute("data-theme");
+    } else {
+      rootElem.setAttribute("data-theme", "dark");
+    }
+  });
+
+  // Sistema de abas
+  const tabs = document.querySelectorAll("nav button[role='tab']");
+  const tabpanels = document.querySelectorAll(".content > div[role='tabpanel']");
+  tabs.forEach(tab => {
+    tab.addEventListener("click", () => {
+      tabs.forEach(t => t.setAttribute("aria-selected", "false"));
+      tab.setAttribute("aria-selected", "true");
+
+      tabpanels.forEach(panel => {
+        if (panel.id === tab.getAttribute("aria-controls")) {
+          panel.classList.add("active");
+          panel.removeAttribute("aria-hidden");
+          panel.focus();
+        } else {
+          panel.classList.remove("active");
+          panel.setAttribute("aria-hidden", "true");
+        }
+      });
+    });
+  });
+
+  // Inicializa
+  renderProducts();
+  updateEvaluationUI();
+  // ...existing code...
+
+const tabChatBtn = document.getElementById("tab-chat-btn");
+const tabChat = document.getElementById("tab-chat");
+const contacts = [
+  { id: "Colaborador", name: "Colaborador", avatar: "https://media-gru2-1.cdn.whatsapp.net/v/t61.24694-24/473405167_922724466468235_6619458111856688806_n.jpg?ccb=11-4&oh=01_Q5Aa1wHU5cbQVK94wvsOy21_w65KYqLkf_N6GV-g5TVoyYFNSw&oe=68593128&_nc_sid=5e03e0&_nc_cat=108" },
+  { id: "suporte", name: "Suporte", avatar: "https://media-gru2-1.cdn.whatsapp.net/v/t61.24694-24/491873889_1915626822515939_2870570369426974683_n.jpg?ccb=11-4&oh=01_Q5Aa1wESqcxHN2qhDQICoGDv-r6ITUFeo6On9CWUIJNLy6YOfA&oe=68595B75&_nc_sid=5e03e0&_nc_cat=105" },
+  { id: "financeiro", name: "Financeiro", avatar: "https://media-gig4-2.cdn.whatsapp.net/v/t61.24694-24/491868808_592719736756738_5017874301514415552_n.jpg?ccb=11-4&oh=01_Q5Aa1wFDa7d_t9IQN-ncN38zzgPsv9aWPxocV_6UaDyjeL8RdQ&oe=685D2C90&_nc_sid=5e03e0&_nc_cat=108"},
+];
+
+const chatConversations = {
+  Colaborador: [],
+  suporte: [],
+  financeiro: []
+};
+
+const contactsList = document.getElementById("contacts-list");
+const contactBtns = contactsList.querySelectorAll(".contact-btn");
+const chatHeader = document.getElementById("chat-header");
+const chatBox = document.getElementById("chat-box");
+const chatForm = document.getElementById("chat-form");
+const chatInput = document.getElementById("chat-input");
+
+let currentContact = "Colaborador";
+
+function renderChat() {
+  chatBox.innerHTML = "";
+  if (!chatConversations[currentContact]) return;
+ chatConversations[currentContact].forEach(msg => {
+    const msgDiv = document.createElement("div");
+    msgDiv.className = "chat-msg " + msg.from;
+    msgDiv.textContent = msg.text;
+    chatBox.appendChild(msgDiv);
+  });
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+contactBtns.forEach(btn => {
+  btn.addEventListener("click", () => {
+    contactBtns.forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    currentContact = btn.dataset.contact;
+    const contact = contacts.find(c => c.id === currentContact);
+    // Capitaliza o nome do contato no cabeçalho
+    chatHeader.innerHTML = `<img src="${contact.avatar}" alt="${contact.name}" class="avatar-img" style="width:28px; height:28px; border-radius:50%; margin-right:8px;">${contact.name}`;
+    renderChat();
+  });
+})
+if (chatForm) {
+  chatForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const msg = chatInput.value.trim();
+    if (msg) {
+      chatConversations[currentContact].push({ from: "user", text: msg });
+      renderChat();
+      chatInput.value = "";
+      setTimeout(() => {
+        let resposta = "Mensagem recebida!";
+        if (currentContact === "suporte") resposta = "Suporte: Como posso ajudar?";
+        if (currentContact === "financeiro") resposta = "Financeiro: Em que posso ajudar?";
+        chatConversations[currentContact].push({ from: "manager", text: resposta });
+        renderChat();
+      }, 800);
+    }
+  });
+}
+// ...existing code...
+// 1. Esconde o formulário ao carregar a página
+document.getElementById("add-product-form").style.display = "none";
+// 2. Mostra o formulário só se o login for admin
+loginForm.addEventListener("submit", function(e) {
+  e.preventDefault();
+  if (loginUser.value === USER && loginPass.value === PASS) {
+    loginModal.style.display = "none";
+    document.getElementById("add-product-form").style.display = "flex";
+    // Aqui você atualiza o avatar:
+    document.getElementById("user-avatar").src =
+      "https://0.gravatar.com/avatar/2a05077998c8a40c664beae00fa253f7c242e7045f9de5f88a41f6cbebaf7261?size=256&d=initials" + encodeURIComponent(loginUser.value) +
+      "&background=002a5a&color=fff&rounded=true&size=40";
+  } else {
+    loginError.style.display = "block";
+    document.getElementById("add-product-form").style.display = "none";
+  }
+});
+// ...existing code...
+</script>
+</body>
+</html>
